@@ -60,11 +60,6 @@
                             autocomplete="off"
                             spellcheck="false"
                         >
-                        <button class="queue-btn" id="queueBtn" title="Add to Queue">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
-                            </svg>
-                        </button>
                         <button class="play-btn" id="loadBtn">
                             <svg viewBox="0 0 24 24" fill="none">
                                 <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" fill="currentColor"/>
@@ -221,21 +216,6 @@
                             </div>
 
                             <div class="controls-right">
-                                <!-- Screenshot -->
-                                <button class="ctrl-btn" id="screenshotBtn" title="Take Screenshot (S)">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <circle cx="12" cy="13" r="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-
-                                <!-- Playlist -->
-                                <button class="ctrl-btn" id="togglePlaylist" title="View Playlist (Q)">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-
                                 <!-- Playback Speed -->
                                 <div class="speed-container">
                                     <button class="ctrl-btn speed-btn" id="speedBtn" title="Playback Speed">
@@ -285,19 +265,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Playlist Drawer -->
-                    <div class="playlist-drawer hidden" id="playlistDrawer">
-                        <div class="playlist-header">
-                            <h3>Queue</h3>
-                            <button class="playlist-close" id="playlistClose">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="playlist-list" id="playlistList"></div>
                     </div>
 
                     <!-- Error Overlay -->
