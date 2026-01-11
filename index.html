@@ -60,26 +60,17 @@
                             autocomplete="off"
                             spellcheck="false"
                         >
+                        <button class="queue-btn" id="queueBtn" title="Add to Queue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                            </svg>
+                        </button>
                         <button class="play-btn" id="loadBtn">
                             <svg viewBox="0 0 24 24" fill="none">
                                 <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" fill="currentColor"/>
                             </svg>
                             <span>Stream</span>
                         </button>
-                        <button class="queue-btn" id="queueBtn" title="Add to Playlist">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- History Section -->
-                    <div class="history-container" id="historyContainer" style="display: none;">
-                        <div class="section-header">
-                            <span class="section-title">Recently Watched</span>
-                            <button class="clear-history" id="clearHistory">Clear</button>
-                        </div>
-                        <div class="history-list" id="historyList"></div>
                     </div>
                     
                     <!-- Proxy toggle for blocked URLs -->
@@ -89,6 +80,15 @@
                             <span class="proxy-slider"></span>
                         </label>
                         <span class="proxy-label">Use Local Proxy (requires server.js running)</span>
+                    </div>
+
+                    <!-- Watch History -->
+                    <div class="history-container" id="historyContainer" style="display: none;">
+                        <div class="section-header">
+                            <span class="section-title">Recently Watched</span>
+                            <button class="clear-history" id="clearHistory">Clear All</button>
+                        </div>
+                        <div class="history-list" id="historyList"></div>
                     </div>
                     
                     <div class="supported-formats">
@@ -103,15 +103,14 @@
 
             <!-- Video Player Section -->
             <section class="player-section" id="playerSection">
-                <div class="player-main-container">
-                    <div class="player-container" id="playerContainer">
-                        <!-- Video Element -->
-                        <video 
-                            id="videoPlayer" 
-                            class="video-element"
-                            preload="auto"
-                            playsinline
-                        ></video>
+                <div class="player-container" id="playerContainer">
+                    <!-- Video Element -->
+                    <video 
+                        id="videoPlayer" 
+                        class="video-element"
+                        preload="auto"
+                        playsinline
+                    ></video>
 
                     <!-- Buffer Indicator (shows when paused and buffering) -->
                     <div class="buffer-indicator" id="bufferIndicator">
@@ -222,6 +221,21 @@
                             </div>
 
                             <div class="controls-right">
+                                <!-- Screenshot -->
+                                <button class="ctrl-btn" id="screenshotBtn" title="Take Screenshot (S)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="12" cy="13" r="4" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Playlist -->
+                                <button class="ctrl-btn" id="togglePlaylist" title="View Playlist (Q)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+
                                 <!-- Playback Speed -->
                                 <div class="speed-container">
                                     <button class="ctrl-btn speed-btn" id="speedBtn" title="Playback Speed">
@@ -252,23 +266,15 @@
                                     </div>
                                 </div>
 
-                                  <!-- Picture in Picture -->
-                                  <button class="ctrl-btn" id="pipBtn" title="Picture in Picture (P)">
-                                      <svg viewBox="0 0 24 24" fill="none">
-                                          <rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
-                                          <rect x="11" y="10" width="9" height="6" rx="1" fill="currentColor"/>
-                                      </svg>
-                                  </button>
+                                <!-- Picture in Picture -->
+                                <button class="ctrl-btn" id="pipBtn" title="Picture in Picture (P)">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                                        <rect x="11" y="10" width="9" height="6" rx="1" fill="currentColor"/>
+                                    </svg>
+                                </button>
 
-                                  <!-- Screenshot -->
-                                  <button class="ctrl-btn" id="screenshotBtn" title="Take Screenshot (S)">
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-linecap="round"/>
-                                          <circle cx="12" cy="13" r="4" stroke-linecap="round"/>
-                                      </svg>
-                                  </button>
-
-                                  <!-- Fullscreen -->
+                                <!-- Fullscreen -->
                                 <button class="ctrl-btn" id="fullscreenBtn" title="Fullscreen (F)">
                                     <svg class="icon-expand" viewBox="0 0 24 24" fill="none">
                                         <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -281,6 +287,19 @@
                         </div>
                     </div>
 
+                    <!-- Playlist Drawer -->
+                    <div class="playlist-drawer hidden" id="playlistDrawer">
+                        <div class="playlist-header">
+                            <h3>Queue</h3>
+                            <button class="playlist-close" id="playlistClose">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="playlist-list" id="playlistList"></div>
+                    </div>
+
                     <!-- Error Overlay -->
                     <div class="error-overlay" id="errorOverlay">
                         <svg viewBox="0 0 64 64" fill="none">
@@ -290,31 +309,6 @@
                         <span class="error-text" id="errorText">Unable to load video</span>
                         <button class="retry-btn" id="retryBtn">Try Again</button>
                     </div>
-
-                    <!-- Playlist Drawer -->
-                    <div class="playlist-drawer" id="playlistDrawer">
-                        <div class="playlist-header">
-                            <span class="playlist-title">Up Next</span>
-                            <button class="playlist-close" id="playlistClose">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="playlist-list" id="playlistList">
-                            <div class="playlist-empty">Your queue is empty</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Player Header Actions -->
-                <div class="player-actions">
-                    <button class="action-btn" id="togglePlaylist" title="Toggle Playlist">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round"/>
-                        </svg>
-                        <span>Playlist</span>
-                    </button>
                 </div>
 
                 <!-- Back Button -->
@@ -354,4 +348,3 @@
     <script src="player.js"></script>
 </body>
 </html>
-
