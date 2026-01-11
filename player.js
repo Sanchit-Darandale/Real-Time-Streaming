@@ -38,6 +38,11 @@ class StreamFlowPlayer {
         this.speedValue = document.getElementById('speedValue');
         this.retryBtn = document.getElementById('retryBtn');
         
+        // Watch History
+        this.historyContainer = document.getElementById('historyContainer');
+        this.historyList = document.getElementById('historyList');
+        this.clearHistoryBtn = document.getElementById('clearHistory');
+        
         // Progress
         this.progressContainer = document.getElementById('progressContainer');
         this.progressBuffer = document.getElementById('progressBuffer');
@@ -72,6 +77,9 @@ class StreamFlowPlayer {
         this.loadStartTime = 0;
         this.bytesLoaded = 0;
         
+        // Watch History State
+        this.history = JSON.parse(localStorage.getItem('streamflow_history') || '[]');
+        
         // Buffer Management
         this.bufferCheckInterval = null;
         this.targetBufferAhead = 60; // seconds to buffer ahead
@@ -96,6 +104,7 @@ class StreamFlowPlayer {
         this.bindEvents();
         this.setupVideoEvents();
         this.updateVolumeUI();
+        this.renderHistory();
         
         // Focus input on load
         this.urlInput.focus();
@@ -110,6 +119,9 @@ class StreamFlowPlayer {
     }
     
     bindEvents() {
+        // Watch History
+        this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
+
         // URL Input
         this.loadBtn.addEventListener('click', () => this.loadVideo());
         this.urlInput.addEventListener('keypress', (e) => {
@@ -339,6 +351,9 @@ class StreamFlowPlayer {
         this.hideError();
         this.showPlayerSection();
         this.showLoading();
+        
+        // Add to history
+        this.addToHistory(this.originalUrl);
         
         // Reset network speed tracking
         this.lastBufferTime = 0;
@@ -1225,7 +1240,72 @@ class StreamFlowPlayer {
         
         this.urlInput.focus();
     }
-    
+
+    renderHistory() {
+        if (this.history.length === 0) {
+            this.historyContainer.style.display = 'none';
+            return;
+        }
+
+        this.historyContainer.style.display = 'block';
+        this.historyList.innerHTML = '';
+
+        this.history.forEach((item, index) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="history-item-info">
+                    <span class="history-item-url" title="${item.url}">${item.url}</span>
+                    <span class="history-item-date">${new Date(item.timestamp).toLocaleString()}</span>
+                </div>
+                <button class="history-remove" data-index="${index}" title="Remove from history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            `;
+
+            historyItem.addEventListener('click', (e) => {
+                if (e.target.closest('.history-remove')) {
+                    e.stopPropagation();
+                    this.removeFromHistory(index);
+                } else {
+                    this.urlInput.value = item.url;
+                    this.loadVideo();
+                }
+            });
+
+            this.historyList.appendChild(historyItem);
+        });
+    }
+
+    addToHistory(url) {
+        // Remove if exists and add to top
+        this.history = this.history.filter(item => item.url !== url);
+        this.history.unshift({
+            url,
+            timestamp: Date.now()
+        });
+
+        // Limit to 10 items
+        if (this.history.length > 10) this.history.pop();
+
+        localStorage.setItem('streamflow_history', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
+    removeFromHistory(index) {
+        this.history.splice(index, 1);
+        localStorage.setItem('streamflow_history', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
+    clearHistory() {
+        this.history = [];
+        localStorage.setItem('streamflow_history', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
     formatTime(seconds) {
         if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
         

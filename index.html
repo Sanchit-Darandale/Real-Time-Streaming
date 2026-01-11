@@ -76,6 +76,15 @@
                         </label>
                         <span class="proxy-label">Use Local Proxy (requires server.js running)</span>
                     </div>
+
+                    <!-- Watch History -->
+                    <div class="history-container" id="historyContainer" style="display: none;">
+                        <div class="section-header">
+                            <span class="section-title">Recently Watched</span>
+                            <button class="clear-history" id="clearHistory">Clear All</button>
+                        </div>
+                        <div class="history-list" id="historyList"></div>
+                    </div>
                     
                     <div class="supported-formats">
                         <span class="format-tag">MP4</span>
@@ -306,4 +315,3 @@
     <script src="player.js"></script>
 </body>
 </html>
-
