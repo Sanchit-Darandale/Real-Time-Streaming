@@ -38,6 +38,17 @@ class StreamFlowPlayer {
         this.speedValue = document.getElementById('speedValue');
         this.retryBtn = document.getElementById('retryBtn');
         
+        // New UI Elements
+        this.screenshotBtn = document.getElementById('screenshotBtn');
+        this.queueBtn = document.getElementById('queueBtn');
+        this.togglePlaylistBtn = document.getElementById('togglePlaylist');
+        this.playlistDrawer = document.getElementById('playlistDrawer');
+        this.playlistClose = document.getElementById('playlistClose');
+        this.playlistList = document.getElementById('playlistList');
+        this.historyContainer = document.getElementById('historyContainer');
+        this.historyList = document.getElementById('historyList');
+        this.clearHistoryBtn = document.getElementById('clearHistory');
+        
         // Progress
         this.progressContainer = document.getElementById('progressContainer');
         this.progressBuffer = document.getElementById('progressBuffer');
@@ -72,6 +83,11 @@ class StreamFlowPlayer {
         this.loadStartTime = 0;
         this.bytesLoaded = 0;
         
+        // New State
+        this.history = JSON.parse(localStorage.getItem('streamflow_history') || '[]');
+        this.playlist = JSON.parse(localStorage.getItem('streamflow_playlist') || '[]');
+        this.currentPlaylistIndex = -1;
+        
         // Buffer Management
         this.bufferCheckInterval = null;
         this.targetBufferAhead = 60; // seconds to buffer ahead
@@ -96,6 +112,8 @@ class StreamFlowPlayer {
         this.bindEvents();
         this.setupVideoEvents();
         this.updateVolumeUI();
+        this.renderHistory();
+        this.renderPlaylist();
         
         // Focus input on load
         this.urlInput.focus();
@@ -110,6 +128,13 @@ class StreamFlowPlayer {
     }
     
     bindEvents() {
+        // New Feature Events
+        this.screenshotBtn.addEventListener('click', () => this.takeScreenshot());
+        this.queueBtn.addEventListener('click', () => this.addToPlaylist());
+        this.togglePlaylistBtn.addEventListener('click', () => this.togglePlaylist());
+        this.playlistClose.addEventListener('click', () => this.togglePlaylist(false));
+        this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
+
         // URL Input
         this.loadBtn.addEventListener('click', () => this.loadVideo());
         this.urlInput.addEventListener('keypress', (e) => {
@@ -292,7 +317,13 @@ class StreamFlowPlayer {
         this.video.addEventListener('ended', () => {
             this.isPlaying = false;
             this.playerContainer.classList.remove('playing');
-            this.playOverlay.classList.remove('hidden');
+            
+            // Auto-play next in playlist if available
+            if (this.currentPlaylistIndex < this.playlist.length - 1) {
+                this.playFromPlaylist(this.currentPlaylistIndex + 1);
+            } else {
+                this.playOverlay.classList.remove('hidden');
+            }
         });
         
         // Time update
@@ -339,6 +370,9 @@ class StreamFlowPlayer {
         this.hideError();
         this.showPlayerSection();
         this.showLoading();
+        
+        // Add to history
+        this.addToHistory(this.originalUrl);
         
         // Reset network speed tracking
         this.lastBufferTime = 0;
@@ -1225,7 +1259,174 @@ class StreamFlowPlayer {
         
         this.urlInput.focus();
     }
-    
+
+    // New Features Logic
+
+    renderHistory() {
+        if (this.history.length === 0) {
+            this.historyContainer.style.display = 'none';
+            return;
+        }
+
+        this.historyContainer.style.display = 'block';
+        this.historyList.innerHTML = '';
+
+        this.history.forEach((item, index) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="history-item-info">
+                    <span class="history-item-url" title="${item.url}">${item.url}</span>
+                    <span class="history-item-date">${new Date(item.timestamp).toLocaleString()}</span>
+                </div>
+                <button class="history-remove" data-index="${index}" title="Remove from history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            `;
+
+            historyItem.addEventListener('click', (e) => {
+                if (e.target.closest('.history-remove')) {
+                    e.stopPropagation();
+                    this.removeFromHistory(index);
+                } else {
+                    this.urlInput.value = item.url;
+                    this.loadVideo();
+                }
+            });
+
+            this.historyList.appendChild(historyItem);
+        });
+    }
+
+    addToHistory(url) {
+        // Remove if exists and add to top
+        this.history = this.history.filter(item => item.url !== url);
+        this.history.unshift({
+            url,
+            timestamp: Date.now()
+        });
+
+        // Limit to 10 items
+        if (this.history.length > 10) this.history.pop();
+
+        localStorage.setItem('streamflow_history', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
+    removeFromHistory(index) {
+        this.history.splice(index, 1);
+        localStorage.setItem('streamflow_history', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
+    clearHistory() {
+        this.history = [];
+        localStorage.setItem('streamflow_history', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
+    renderPlaylist() {
+        if (this.playlist.length === 0) {
+            this.playlistList.innerHTML = '<div class="playlist-empty">Your queue is empty</div>';
+            return;
+        }
+
+        this.playlistList.innerHTML = '';
+        this.playlist.forEach((item, index) => {
+            const playlistItem = document.createElement('div');
+            playlistItem.className = `playlist-item ${this.currentPlaylistIndex === index ? 'active' : ''}`;
+            playlistItem.innerHTML = `
+                <span class="playlist-item-index">${index + 1}</span>
+                <div class="playlist-item-info">
+                    <div class="playlist-item-url" title="${item.url}">${item.url}</div>
+                </div>
+                <button class="playlist-remove" data-index="${index}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            `;
+
+            playlistItem.addEventListener('click', (e) => {
+                if (e.target.closest('.playlist-remove')) {
+                    e.stopPropagation();
+                    this.removeFromPlaylist(index);
+                } else {
+                    this.playFromPlaylist(index);
+                }
+            });
+
+            this.playlistList.appendChild(playlistItem);
+        });
+    }
+
+    addToPlaylist() {
+        const url = this.urlInput.value.trim();
+        if (!url) return;
+
+        this.playlist.push({ url });
+        localStorage.setItem('streamflow_playlist', JSON.stringify(this.playlist));
+        this.renderPlaylist();
+        
+        // Toggle playlist drawer to show added item
+        this.togglePlaylist(true);
+    }
+
+    removeFromPlaylist(index) {
+        this.playlist.splice(index, 1);
+        if (this.currentPlaylistIndex === index) {
+            this.currentPlaylistIndex = -1;
+        } else if (this.currentPlaylistIndex > index) {
+            this.currentPlaylistIndex--;
+        }
+        localStorage.setItem('streamflow_playlist', JSON.stringify(this.playlist));
+        this.renderPlaylist();
+    }
+
+    togglePlaylist(show) {
+        if (show === undefined) {
+            this.playlistDrawer.classList.toggle('hidden');
+        } else if (show) {
+            this.playlistDrawer.classList.remove('hidden');
+        } else {
+            this.playlistDrawer.classList.add('hidden');
+        }
+    }
+
+    playFromPlaylist(index) {
+        if (index < 0 || index >= this.playlist.length) return;
+        
+        this.currentPlaylistIndex = index;
+        this.urlInput.value = this.playlist[index].url;
+        this.loadVideo();
+        this.renderPlaylist();
+    }
+
+    takeScreenshot() {
+        if (!this.video.readyState) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = this.video.videoWidth;
+        canvas.height = this.video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(this.video, 0, 0, canvas.width, canvas.height);
+        
+        try {
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.download = `streamflow-screenshot-${timestamp}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (e) {
+            console.error('Screenshot error (likely CORS):', e);
+            this.showError('Cannot take screenshot due to video security restrictions (CORS)');
+        }
+    }
+
     formatTime(seconds) {
         if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
         
