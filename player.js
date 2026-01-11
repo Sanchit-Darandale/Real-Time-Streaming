@@ -38,7 +38,7 @@ class StreamFlowPlayer {
         this.speedValue = document.getElementById('speedValue');
         this.retryBtn = document.getElementById('retryBtn');
         
-        // New UI Elements
+        // Watch History
         this.historyContainer = document.getElementById('historyContainer');
         this.historyList = document.getElementById('historyList');
         this.clearHistoryBtn = document.getElementById('clearHistory');
@@ -77,7 +77,7 @@ class StreamFlowPlayer {
         this.loadStartTime = 0;
         this.bytesLoaded = 0;
         
-        // New State
+        // Watch History State
         this.history = JSON.parse(localStorage.getItem('streamflow_history') || '[]');
         
         // Buffer Management
@@ -119,7 +119,7 @@ class StreamFlowPlayer {
     }
     
     bindEvents() {
-        // New Feature Events
+        // Watch History
         this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
 
         // URL Input
@@ -1240,8 +1240,6 @@ class StreamFlowPlayer {
         
         this.urlInput.focus();
     }
-
-    // New Features Logic
 
     renderHistory() {
         if (this.history.length === 0) {

@@ -1346,30 +1346,6 @@ body {
     box-shadow: 0 8px 24px rgba(0, 245, 212, 0.3);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .playlist-drawer {
-        width: 100%;
-    }
-}
-
-/* Fullscreen Styles */
-.player-container:-webkit-full-screen {
-    border-radius: 0;
-}
-
-.player-container:fullscreen {
-    border-radius: 0;
-}
-
-.player-container:-webkit-full-screen .controls {
-    padding: 80px 40px 40px;
-}
-
-.player-container:fullscreen .controls {
-    padding: 80px 40px 40px;
-}
-
 /* Hide cursor when playing in fullscreen */
 .player-container.fullscreen.playing.hide-cursor {
     cursor: none;
