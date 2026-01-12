@@ -26,32 +26,32 @@ const MIME_TYPES = {
 const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
-    
+
     // Add CORS headers to all responses
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges');
-    
+
     // Handle preflight requests
     if (req.method === 'OPTIONS') {
         res.writeHead(200);
         res.end();
         return;
     }
-    
+
     // Proxy endpoint: /proxy?url=VIDEO_URL
     if (pathname === '/proxy') {
         const videoUrl = parsedUrl.query.url;
-        
+
         if (!videoUrl) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Missing url parameter' }));
             return;
         }
-        
+
         console.log(`\n🎬 Proxying: ${videoUrl}`);
-        
+
         try {
             await proxyVideo(videoUrl, req, res);
         } catch (error) {
@@ -64,21 +64,31 @@ const server = http.createServer(async (req, res) => {
         }
         return;
     }
-    
+    if (pathname === '/status') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            status: 'online',
+            server: 'StreamFlow Proxy',
+            time: new Date().toISOString()
+        }));
+        return;
+    }
+
+
     // Serve static files
     let filePath = pathname === '/' ? '/index.html' : pathname;
     filePath = path.join(__dirname, filePath);
-    
+
     // Security: prevent directory traversal
     if (!filePath.startsWith(__dirname)) {
         res.writeHead(403);
         res.end('Forbidden');
         return;
     }
-    
+
     const ext = path.extname(filePath);
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    
+
     fs.readFile(filePath, (err, data) => {
         if (err) {
             if (err.code === 'ENOENT') {
@@ -90,7 +100,7 @@ const server = http.createServer(async (req, res) => {
             }
             return;
         }
-        
+
         res.writeHead(200, { 'Content-Type': contentType });
         res.end(data);
     });
@@ -100,7 +110,7 @@ function proxyVideo(videoUrl, clientReq, clientRes) {
     return new Promise((resolve, reject) => {
         const parsedUrl = url.parse(videoUrl);
         const protocol = parsedUrl.protocol === 'https:' ? https : http;
-        
+
         // Forward Range header for seeking support
         const headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -109,13 +119,13 @@ function proxyVideo(videoUrl, clientReq, clientRes) {
             'Connection': 'keep-alive',
             'Referer': `${parsedUrl.protocol}//${parsedUrl.hostname}/`
         };
-        
+
         // Forward Range header for seeking
         if (clientReq.headers.range) {
             headers['Range'] = clientReq.headers.range;
             console.log(`📍 Range: ${clientReq.headers.range}`);
         }
-        
+
         const options = {
             hostname: parsedUrl.hostname,
             port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
@@ -124,10 +134,10 @@ function proxyVideo(videoUrl, clientReq, clientRes) {
             headers: headers,
             timeout: 30000
         };
-        
+
         const proxyReq = protocol.request(options, (proxyRes) => {
             console.log(`📥 Response: ${proxyRes.statusCode}`);
-            
+
             // Handle redirects
             if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
                 let redirectUrl = proxyRes.headers.location;
@@ -141,37 +151,37 @@ function proxyVideo(videoUrl, clientReq, clientRes) {
                     .catch(reject);
                 return;
             }
-            
+
             // Forward response headers
             const responseHeaders = {
                 'Content-Type': proxyRes.headers['content-type'] || 'video/mp4',
                 'Accept-Ranges': 'bytes',
                 'Cache-Control': 'no-cache'
             };
-            
+
             if (proxyRes.headers['content-length']) {
                 responseHeaders['Content-Length'] = proxyRes.headers['content-length'];
             }
-            
+
             if (proxyRes.headers['content-range']) {
                 responseHeaders['Content-Range'] = proxyRes.headers['content-range'];
             }
-            
+
             // Use appropriate status code
             const statusCode = proxyRes.statusCode;
-            
+
             if (!clientRes.headersSent) {
                 clientRes.writeHead(statusCode, responseHeaders);
             }
-            
+
             // Pipe the video stream to client
             proxyRes.pipe(clientRes);
-            
+
             proxyRes.on('end', () => {
                 console.log('✅ Done');
                 resolve();
             });
-            
+
             proxyRes.on('error', (err) => {
                 console.error('Stream error:', err.message);
                 if (!clientRes.headersSent) {
@@ -181,27 +191,27 @@ function proxyVideo(videoUrl, clientReq, clientRes) {
                 }
             });
         });
-        
+
         proxyReq.on('timeout', () => {
             console.error('⏱️ Request timeout');
             proxyReq.destroy();
             reject(new Error('Request timeout'));
         });
-        
+
         proxyReq.on('error', (err) => {
             console.error('Request error:', err.message);
             reject(err);
         });
-        
+
         // Handle client disconnect
         clientReq.on('close', () => {
             proxyReq.destroy();
         });
-        
+
         clientRes.on('close', () => {
             proxyReq.destroy();
         });
-        
+
         proxyReq.end();
     });
 }
