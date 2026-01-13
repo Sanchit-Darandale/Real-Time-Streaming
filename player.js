@@ -12,7 +12,6 @@ class StreamFlowPlayer {
         this.video = document.getElementById('videoPlayer');
         this.urlInput = document.getElementById('videoUrl');
         this.loadBtn = document.getElementById('loadBtn');
-        this.backBtn = document.getElementById('backBtn');
         this.useProxyCheckbox = document.getElementById('useProxy');
         
         // Overlays
@@ -115,7 +114,6 @@ class StreamFlowPlayer {
         this.urlInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.loadVideo();
         });
-        this.backBtn.addEventListener('click', () => this.showUrlSection());
         this.retryBtn.addEventListener('click', () => this.loadVideo());
         
         // Play Controls
