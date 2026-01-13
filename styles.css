@@ -630,11 +630,17 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 60px 20px 20px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all var(--transition-normal);
+
+    padding: 12px 12px 10px;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 0%,
+        rgba(0, 0, 0, 0.4) 60%,
+        transparent 100%
+    );
+
+    opacity: 1;              /* ALWAYS visible on mobile */
+    transform: none;
     z-index: 25;
 }
 
@@ -655,8 +661,10 @@ body {
     transition: height var(--transition-fast);
 }
 
-.progress-container:hover {
-    height: 10px;
+.progress-container {
+    height: 4px;
+    margin-bottom: 10px;
+    border-radius: 2px;
 }
 
 .progress-buffer {
@@ -734,7 +742,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 8px;
+    flex-wrap: nowrap;
 }
 
 .controls-left,
@@ -745,19 +754,19 @@ body {
 }
 
 .ctrl-btn {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     background: transparent;
     border: none;
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
 }
-
 .ctrl-btn svg {
     width: 22px;
     height: 22px;
