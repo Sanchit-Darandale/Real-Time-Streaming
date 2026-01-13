@@ -1403,3 +1403,19 @@ body {
     }
 }
 
+.controls-row.single-row {
+    justify-content: flex-start;
+}
+
+.controls-row.single-row .controls-left {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-display {
+    margin-left: auto;
+    font-size: 0.8rem;
+    white-space: nowrap;
+   }
