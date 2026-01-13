@@ -363,7 +363,7 @@ class StreamFlowPlayer {
         
         // Update URL params
         const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('url', encodeURIComponent(url));
+        newUrl.searchParams.set('url', url);
         window.history.replaceState({}, '', newUrl);
     }
     
